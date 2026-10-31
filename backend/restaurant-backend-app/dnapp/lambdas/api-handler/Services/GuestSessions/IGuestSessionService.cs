@@ -1,5 +1,5 @@
+using APIHandler.Entities;
 using APIHandler.Models.GuestSessions;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace APIHandler.Services.GuestSessions;
@@ -13,7 +13,10 @@ public interface IGuestSessionService
     Task<bool> IsAuthorizedAsync(string guestSessionToken, string guestSessionId);
     Task SubmitCartAsync(string guestSessionId);
     Task<GuestMenuResponse> GetGuestMenuAsync(string guestSessionId);
+    Task<GetAllSessionsResponse> GetAllSessionsAsync(string userId, string groupReservationId);
     Task<GetAllSessionsResponse> DeleteGuestSessionAsync(string userId, string groupReservationId, string guestSessionId);
     Task<GetGuestSessionResponse> GetGuestSessionInfoAsync(string guestSessionId);
+    Task<GuestSession> CreateGroupOwnerSessionAsync(string userId, string groupReservationId);
+    Task<GetOwnerSessionIdResponse> GetOwnerSessionIdAsync(string userId, string reservationId);
 }
 
