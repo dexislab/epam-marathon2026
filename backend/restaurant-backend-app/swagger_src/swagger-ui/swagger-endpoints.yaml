@@ -157,7 +157,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /guest/groups/{groupReservationId}/submit:
+  /group-reservations/{groupReservationId}/submit:
     post:
       tags:
         - Group Reservations
@@ -171,6 +171,8 @@ paths:
           description: The ID of the group reservation
           schema:
             type: string
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -185,10 +187,27 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  description: Enriched dishes data
+                  $ref: '#/components/schemas/SubmittedGroupDish'
         '400':
           description: Invalid request - missing parameters or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - caller is not the reservation owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Group reservation or reservation not found
           content:
             application/json:
               schema:
@@ -279,7 +298,7 @@ paths:
       tags:
         - Guest Sessions
       summary: Get all sessions for group reservation
-      description: Retrieves all guest sessions for a group reservation
+      description: Retrieves the participant snapshot for a group reservation. Only the reservation owner may access it.
       operationId: getAllSessionsForGroup
       parameters:
         - name: groupReservationId
@@ -303,8 +322,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - authenticated user claim is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - caller is not the reservation owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Group reservation not found or GroupId is required
+          description: Group reservation or parent reservation not found
           content:
             application/json:
               schema:
@@ -335,6 +366,18 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
         '400':
           description: Invalid request or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - caller is not the reservation owner
           content:
             application/json:
               schema:
@@ -458,16 +501,21 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Updated snapshot of the group reservation
+                $ref: '#/components/schemas/GetAllSessionsResponse'
         '400':
-          description: Invalid request - missing required path parameters
+          description: Invalid request, session belongs to another group, or the owner session cannot be deleted
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - caller is not the reservation owner
           content:
             application/json:
               schema:
@@ -573,6 +621,19 @@ components:
           description: The ID of the reservation (owner of the group)
           example: res-123
 
+    SubmittedGroupDish:
+      type: object
+      required:
+        - dishId
+        - quantity
+      properties:
+        dishId:
+          type: string
+          example: dish-123
+        quantity:
+          type: integer
+          example: 3
+
     GroupReservationStatusResponse:
       type: object
       properties:
@@ -671,7 +732,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/OrderItemResponse'
+            $ref: '#/components/schemas/GroupParticipantItem'
           description: Items ordered by the participant
         total:
           type: number
@@ -682,6 +743,19 @@ components:
           type: boolean
           description: Whether the participant has submitted their cart
           example: true
+
+    GroupParticipantItem:
+      type: object
+      required:
+        - dish
+        - quantity
+      properties:
+        dish:
+          $ref: '#/components/schemas/DishResponse'
+        quantity:
+          type: integer
+          description: Quantity ordered by the participant
+          example: 2
 
     OrderItemResponse:
       type: object

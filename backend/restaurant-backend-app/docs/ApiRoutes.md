@@ -1179,31 +1179,93 @@ Response: 200 OK
 }
 ```
 
-### `POST` /group-reservations/{groupReservationId}/submit
+### `GET` /reservations/{reservationId}/guest-session-id
+Owner-only. Returns the existing owner guest session ID, creating the owner session when none exists.
+
 Response: 200 OK
 ```json
 {
-  "message": "Group reservation pre-order submitted successfully."
+  "guestSessionId": "owner-session-123"
 }
 ```
 
-### `GET` /guest/groups/{groupReservationId}/sessions
+### `POST` /group-reservations/{groupReservationId}/submit
+Request body:
+```json
+{
+  "reservationId": "reservation-123"
+}
+```
+Owner-only. The response includes the merged submitted dishes. Returns `400` when there are no submitted sessions, no submitted dishes, or no order; `403` for a non-owner; and `404` when the reservation or group reservation is missing.
+
 Response: 200 OK
 ```json
 [
   {
-    "id": "string",
-    "groupReservationId": "string",
-    "guestName": "string",
-    "status": "string"
+    "dishId": "dish1",
+    "quantity": 3
+  },
+  {
+    "dishId": "dish2",
+    "quantity": 2
   }
 ]
 ```
 
-### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
+### `GET` /guest/groups/{groupReservationId}/sessions
+Owner-only. Returns the current participant snapshot. The request returns `401` when unauthenticated, `403` when the caller does not own the reservation, and `404` when the group or parent reservation is missing.
+
 Response: 200 OK
 ```json
 {
-  "message": "Guest session removed from group successfully."
+  "participants": [
+    {
+      "id": "session1",
+      "type": "Guest",
+      "name": "Andrii",
+      "items": [
+        {
+          "dish": {
+            "id": "dish1",
+            "name": "Caesar Salad",
+            "price": 180
+          },
+          "quantity": 2
+        }
+      ],
+      "total": 360,
+      "isSubmitted": true
+    }
+  ],
+  "total": 360
+}
+```
+
+### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
+Owner-only. Removes a guest session from the group and returns the refreshed participant snapshot. Returns `400` if the session belongs to another group or is the owner session, `403` if the caller is not the reservation owner, and `404` if the guest session, group, or parent reservation is missing.
+
+Response: 200 OK
+```json
+{
+  "participants": [
+    {
+      "id": "session2",
+      "type": "Guest",
+      "name": "Olena",
+      "items": [
+        {
+          "dish": {
+            "id": "dish2",
+            "name": "Tom Yum",
+            "price": 220
+          },
+          "quantity": 1
+        }
+      ],
+      "total": 220,
+      "isSubmitted": false
+    }
+  ],
+  "total": 220
 }
 ```
