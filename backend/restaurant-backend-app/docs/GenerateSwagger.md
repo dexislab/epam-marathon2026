@@ -16,3 +16,11 @@ syndicate generate swagger-ui --name swagger-ui --target-bucket swaggerui --path
 +"target_bucket": "${swagger_ui_hoster_bucket_name}"
 ```
 6. Redeploy application using `syndicate deploy`.
+
+## Troubleshooting
+
+Export schema:
+
+```
+syndicate export -rt api_gateway -d dev
+```

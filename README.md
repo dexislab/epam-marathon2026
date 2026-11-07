@@ -41,12 +41,6 @@ Replace variables with your **AWS account ID** and **Email**
 Before running `terraform init`, create the Terraform state bucket with AWS CLI if it does not already exist. 
 Get your AWS account ID from the CLI first:
 
-Windows PowerShell:
-
-```powershell
-$ACCOUNT_ID = aws sts get-caller-identity --query Account --output text
-```
-
 Linux or macOS:
 
 ```bash
@@ -62,24 +56,6 @@ AWS Management Console equivalent:
 
 As alternative you can you AWS CLI
 Replace the bucket name with the CLI variable:
-
-Windows PowerShell:
-
-```powershell
-aws s3api create-bucket `
-	--bucket restaurant-terraform-state-$ACCOUNT_ID `
-	--region us-west-2 `
-	--create-bucket-configuration LocationConstraint=us-west-2
-
-aws s3api put-bucket-versioning `
-	--bucket restaurant-terraform-state-$ACCOUNT_ID `
-	--versioning-configuration Status=Enabled
-
-aws s3api put-public-access-block `
-		--bucket restaurant-terraform-state-$ACCOUNT_ID `
-	--public-access-block-configuration `
-		"BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
-```
 
 Linux or macOS:
 
@@ -118,19 +94,6 @@ edit syndicate.yml → set project_path to your local absolute path to backend/r
 Replace bucket names with your AWS account ID
 - `.syndicate-config-restaurant-backend-app/syndicate.yml`
 - `.syndicate-config-restaurant-backend-app/syndicate_aliases.yml`
-
-On Windows PowerShell, run:
-
-```powershell
-cd ../../backend/restaurant-backend-app
-python3 -m venv syndicate_venv
-.\syndicate_venv\Scripts\Activate.ps1
-pip install aws-syndicate
-$env:SDCT_CONF = (Resolve-Path ".\.syndicate-config-restaurant-backend-app").Path
-syndicate create-deploy-target-bucket
-syndicate build
-syndicate deploy --deploy_name dev
-```
 
 On Linux or macOS, run:
 
@@ -179,13 +142,6 @@ aws apigateway get-rest-apis --region us-west-2 --query "items[?name=='restauran
 ```
 
 Or set variables from AWS CLI:
-
-Windows PowerShell:
-
-```powershell
-$API_ID = aws apigateway get-rest-apis --region us-west-2 --query "items[?name=='restaurant-backend-api'].id | [0]" --output text
-$env:BACKEND_URL = "https://$API_ID.execute-api.us-west-2.amazonaws.com/develop"
-```
 
 Linux or macOS:
 
@@ -257,12 +213,6 @@ If you are not using the shared training account, replace the bucket name with y
 ### Clean up backend resources with Syndicate
 
 From the backend project directory, use the same Syndicate configuration and run:
-
-```powershell
-cd ../../backend/restaurant-backend-app
-$env:SDCT_CONF = (Resolve-Path ".\.syndicate-config-restaurant-backend-app").Path
-syndicate clean
-```
 
 On Linux or macOS, use:
 
