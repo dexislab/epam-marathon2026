@@ -558,7 +558,7 @@ Response: `200 OK`
 Response: `200 OK`
 ```json
 {
-  "guestSessionId": "string"
+  "guestSessionId": "owner-session-123"
 }
 ```
 
@@ -1180,7 +1180,7 @@ Response: 200 OK
 ```
 
 ### `GET` /reservations/{reservationId}/guest-session-id
-Owner-only. Returns the existing owner guest session ID, creating the owner session when none exists.
+Owner-only. Returns the existing owner guest session ID, creating the owner session when none exists. The owner uses the same Cognito bearer token from this request for the existing guest-session dish and submit endpoints.
 
 Response: 200 OK
 ```json

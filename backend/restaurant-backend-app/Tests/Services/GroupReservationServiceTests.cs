@@ -10,6 +10,7 @@ using APIHandler.Repositories.Reservations;
 using APIHandler.Repositories.Tables;
 using APIHandler.Services.Auth;
 using APIHandler.Services.GroupReservations;
+using APIHandler.Services.GuestSessions;
 using APIHandler.Services.Locations;
 using AutoFixture.Xunit2;
 using Moq;
@@ -23,6 +24,7 @@ public class GroupReservationServiceTests
     private readonly Mock<IReservationRepository> _reservationRepositoryMock = new();
     private readonly Mock<IGuestSessionRepository> _guestSessionRepositoryMock = new();
     private readonly Mock<IOrderRepository> _orderRepositoryMock = new();
+    private readonly Mock<IGuestSessionService> _guestSessionServiceMock = new();
     private readonly Mock<IUserService> _userServiceMock = new();
     private readonly Mock<ILocationService> _locationServiceMock = new();
 
@@ -36,8 +38,31 @@ public class GroupReservationServiceTests
             _reservationRepositoryMock.Object,
             _guestSessionRepositoryMock.Object,
             _orderRepositoryMock.Object,
+            _guestSessionServiceMock.Object,
             _userServiceMock.Object,
             _locationServiceMock.Object);
+    }
+
+    [Fact]
+    public async Task CreateGroupReservationIfDoesNotExistAsync_CreatesOwnerSession()
+    {
+        const string userId = "owner-user";
+        const string reservationId = "reservation-1";
+        GroupReservation? createdGroup = null;
+
+        _groupReservationRepositoryMock
+            .Setup(r => r.GetByReservationIdAsync(reservationId))
+            .ReturnsAsync((GroupReservation?)null);
+        _groupReservationRepositoryMock
+            .Setup(r => r.SaveGroupReservationAsync(It.IsAny<GroupReservation>()))
+            .Callback<GroupReservation>(group => createdGroup = group);
+
+        await _service.CreateGroupReservationIfDoesNotExistAsync(userId, reservationId);
+
+        Assert.NotNull(createdGroup);
+        _guestSessionServiceMock.Verify(
+            service => service.CreateGroupOwnerSessionAsync(userId, createdGroup.GroupReservationId),
+            Times.Once);
     }
 
     [Fact]

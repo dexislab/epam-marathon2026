@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using APIHandler.Services.Notifications;
 
@@ -33,7 +34,7 @@ public class GuestSessionService(
 {
     public async Task<bool> IsAuthorizedAsync(string guestSessionToken, string guestSessionId)
     {
-        string hash = Convert.ToBase64String(SHA256.HashData(Convert.FromBase64String(guestSessionToken)));
+        string hash = HashGuestSessionToken(guestSessionToken);
         GuestSession? guestSession = await guestSessionRepository.GetByTokenHash(hash);
         if (guestSession is null)
             return false;
@@ -197,6 +198,7 @@ public class GuestSessionService(
     public async Task<GetAllSessionsResponse> GetAllSessionsAsync(string userId, string groupReservationId)
     {
         await ValidateReservationOwnerAsync(groupReservationId, userId);
+        await CreateGroupOwnerSessionAsync(userId, groupReservationId);
         return await BuildGroupSnapshotAsync(groupReservationId);
     }
 
@@ -329,6 +331,11 @@ public class GuestSessionService(
 
     public async Task<GuestSession> CreateGroupOwnerSessionAsync(string userId, string groupReservationId)
     {
+        var existingSession = (await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId))
+            .FirstOrDefault(session => session.IsOwnerSession);
+        if (existingSession is not null)
+            return existingSession;
+
         var session = new GuestSession()
         {
             Id = Guid.NewGuid().ToString(),
@@ -343,7 +350,10 @@ public class GuestSessionService(
         return session;
     }
 
-    public async Task<GetOwnerSessionIdResponse> GetOwnerSessionIdAsync(string userId, string reservationId)
+    public async Task<GetOwnerSessionIdResponse> GetOwnerSessionIdAsync(
+        string userId,
+        string reservationId,
+        string ownerAccessToken)
     {
         var reservation = await reservationRepository.GetReservationByIdAsync(reservationId)
             ?? throw new ReservationNotFoundException("Reservation not found.");
@@ -354,11 +364,26 @@ public class GuestSessionService(
         var groupReservation = await groupReservationRepository.GetByReservationIdAsync(reservationId)
             ?? throw new GroupReservationNotFoundException();
 
-        var sessions = await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservation.GroupReservationId);
-        var ownerSession = sessions.FirstOrDefault(session => session.IsOwnerSession)
-            ?? await CreateGroupOwnerSessionAsync(userId, groupReservation.GroupReservationId);
+        var ownerSession = await CreateGroupOwnerSessionAsync(userId, groupReservation.GroupReservationId);
+        ownerSession.SessionTokenHash = HashGuestSessionToken(ownerAccessToken);
+        await guestSessionRepository.SaveAsync(ownerSession);
 
         return new GetOwnerSessionIdResponse(ownerSession.Id);
+    }
+
+    private static string HashGuestSessionToken(string token)
+    {
+        byte[] tokenBytes;
+        try
+        {
+            tokenBytes = Convert.FromBase64String(token);
+        }
+        catch (FormatException)
+        {
+            tokenBytes = Encoding.UTF8.GetBytes(token);
+        }
+
+        return Convert.ToBase64String(SHA256.HashData(tokenBytes));
     }
 
     private async Task<string> ResolveOwnerDisplayNameAsync(GuestSession ownerSession)

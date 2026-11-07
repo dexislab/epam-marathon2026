@@ -532,7 +532,7 @@ paths:
       tags:
         - Guest Sessions
       summary: Get owner's guest session ID
-      description: Retrieves the guest session ID for the reservation owner
+      description: Retrieves the guest session ID for the reservation owner. The owner's authenticated Cognito bearer token can be used for operations on this session.
       operationId: getOwnerSessionId
       parameters:
         - name: reservationId
