@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - yyyy-MM-dd
+
 ### Added
 - **Level 1: Owner group-session snapshot.** Added `GET /guest/groups/{groupReservationId}/sessions` so the reservation owner can retrieve the current group pre-order snapshot. The response includes each participant's session ID, participant type, display name, dish details and quantities, participant subtotal, and submission state, plus the total across participants.
 - Added owner authorization for the group-session snapshot. The handler requires the authenticated Cognito user ID, validates that the group and its parent reservation exist, and rejects callers who do not own the reservation. Missing authentication, non-owner access, and missing group or reservation are returned as the corresponding `401`, `403`, and `404` responses.
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated DELETE response serialization to use the same camelCase JSON shape as the Level 1 snapshot endpoint. Updated the OpenAPI response schema/status documentation and API routes guide to show the homework snapshot contract and owner-only/error behavior.
 
 ## [1.0.0] - yyyy-MM-dd
+
 ### Added
     -  Added items
 

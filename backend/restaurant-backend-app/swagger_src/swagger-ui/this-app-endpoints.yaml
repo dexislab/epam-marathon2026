@@ -7,8 +7,8 @@ info:
     name: API Support
 
 servers:
-  - url: https://eknqcvq3l1.execute-api.us-west-2.amazonaws.com/develop
-    description: Production environment
+  - url: https://311vnnaz6l.execute-api.us-west-2.amazonaws.com/develop
+    description: Development environment
 
 tags:
   - name: Guest Sessions
