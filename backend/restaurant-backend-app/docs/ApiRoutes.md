@@ -1093,7 +1093,7 @@ Request body:
   "guestName": "string"
 }
 ```
-Guests may call this endpoint without authentication. When the reservation owner creates their session, the client may include `Authorization: Bearer <Cognito ID token>`; the backend validates the token and marks that same session as the owner session only when its subject owns the reservation. Missing or invalid optional authentication falls through to normal guest-session creation. If Cognito signing metadata cannot be reached to validate a supplied token, the endpoint returns `503` so the client can retry. No separate empty owner session is created.
+Guests may call this endpoint without authentication. The owner session is created with the group reservation. If the owner creates a session here and includes `Authorization: Bearer <Cognito ID token>`, the backend validates the token and reuses the pre-created owner session only when its subject owns the reservation. Missing or invalid optional authentication falls through to normal guest-session creation. If Cognito signing metadata cannot be reached to validate a supplied token, the endpoint returns `503` so the client can retry.
 Response: 201 Created
 ```json
 {
@@ -1182,7 +1182,7 @@ Response: 200 OK
 ```
 
 ### `GET` /reservations/{reservationId}/guest-session-id
-Owner-only. Returns the owner guest session ID after the owner has created a session through `POST /guest/sessions`. This endpoint does not create an empty owner session.
+Owner-only. Returns the owner guest session ID created when the group reservation was set up and associates the authenticated Cognito bearer token with that session for the existing guest-session cart endpoints.
 
 Response: 200 OK
 ```json

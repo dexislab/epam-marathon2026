@@ -128,7 +128,7 @@ paths:
       tags:
         - Guest Sessions
       summary: Create guest session
-      description: Creates a new guest session for a group reservation. Guests may call anonymously. An owner may include a Cognito ID token in the Authorization bearer header; when validated as the reservation owner, the created session is marked as the owner session.
+      description: Creates a guest session for a group reservation. Guests may call anonymously. The owner session is created with the group reservation; an owner may include a Cognito ID token so this endpoint can reuse that owner session and associate the returned guest session token with it.
       operationId: createGuestSession
       security:
         - bearerAuth: []
@@ -540,7 +540,7 @@ paths:
       tags:
         - Guest Sessions
       summary: Get owner's guest session ID
-      description: Retrieves the guest session ID for the reservation owner. The owner's authenticated Cognito bearer token can be used for operations on this session.
+      description: Retrieves the pre-created guest session ID for the reservation owner and associates the owner's authenticated Cognito bearer token with the session for existing cart operations.
       operationId: getOwnerSessionId
       parameters:
         - name: reservationId
