@@ -10,6 +10,7 @@ using APIHandler.Repositories.Orders;
 using APIHandler.Repositories.Reservations;
 using APIHandler.Repositories.Tables;
 using APIHandler.Services.Auth;
+using APIHandler.Services.GuestSessions;
 using APIHandler.Services.Locations;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ public class GroupReservationService(
     IReservationRepository reservationRepository,
     IGuestSessionRepository guestSessionRepository,
     IOrderRepository orderRepository,
+    IGuestSessionService guestSessionService,
     IUserService userService,
     ILocationService locationService) : IGroupReservationService
 {
@@ -90,10 +92,13 @@ public class GroupReservationService(
         return groupReservation;
     }
 
-    public async Task CreateGroupReservationIfDoesNotExistAsync(string reservationId)
+    public async Task CreateGroupReservationIfDoesNotExistAsync(string? userId, string reservationId)
     {
-        if (await groupReservationRepository.GetByReservationIdAsync(reservationId) is null)
-            await CreateGroupReservationAsync(reservationId);
+        GroupReservation? group = await groupReservationRepository.GetByReservationIdAsync(reservationId);
+        group ??= await CreateGroupReservationAsync(reservationId);
+
+        if (!string.IsNullOrWhiteSpace(userId))
+            await guestSessionService.CreateGroupOwnerSessionAsync(userId, group.GroupReservationId);
     }
 
     public async Task UpdateGroupReservationStatusAsync(string groupReservationId, GroupReservationStatus status)
