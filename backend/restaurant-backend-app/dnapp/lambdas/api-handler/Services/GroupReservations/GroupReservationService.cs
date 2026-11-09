@@ -10,7 +10,6 @@ using APIHandler.Repositories.Orders;
 using APIHandler.Repositories.Reservations;
 using APIHandler.Repositories.Tables;
 using APIHandler.Services.Auth;
-using APIHandler.Services.GuestSessions;
 using APIHandler.Services.Locations;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,6 @@ public class GroupReservationService(
     IReservationRepository reservationRepository,
     IGuestSessionRepository guestSessionRepository,
     IOrderRepository orderRepository,
-    IGuestSessionService guestSessionService,
     IUserService userService,
     ILocationService locationService) : IGroupReservationService
 {
@@ -92,12 +90,10 @@ public class GroupReservationService(
         return groupReservation;
     }
 
-    public async Task CreateGroupReservationIfDoesNotExistAsync(string userId, string reservationId)
+    public async Task CreateGroupReservationIfDoesNotExistAsync(string reservationId)
     {
-        GroupReservation? group = await groupReservationRepository.GetByReservationIdAsync(reservationId);
-        group ??= await CreateGroupReservationAsync(reservationId);
-
-        await guestSessionService.CreateGroupOwnerSessionAsync(userId, group.GroupReservationId);
+        if (await groupReservationRepository.GetByReservationIdAsync(reservationId) is null)
+            await CreateGroupReservationAsync(reservationId);
     }
 
     public async Task UpdateGroupReservationStatusAsync(string groupReservationId, GroupReservationStatus status)
@@ -203,4 +199,3 @@ public class GroupReservationService(
         return submittedDishes;
     }
 }
-

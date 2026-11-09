@@ -13,7 +13,7 @@ public interface IGroupReservationService
     Task UpdateGroupReservationStatusAsync(string groupReservationId, GroupReservationStatus status);
     Task DeleteGroupReservationAsync(string groupReservationId);
     Task<GetGroupReservationResponse> GetGroupReservationByTokenAsync(string token);
-    Task CreateGroupReservationIfDoesNotExistAsync(string userId, string reservationId);
+    Task CreateGroupReservationIfDoesNotExistAsync(string reservationId);
     Task CloseGroupReservationAsync(string reservationId);
     Task<GetGroupInviteTokenResponse> GetGroupReservationInviteTokenAsync(string reservationId);
     Task<IReadOnlyList<SubmittedGroupDish>> SubmitGroupPreOrderAsync(string userId, string groupReservationId, string reservationId);

@@ -70,7 +70,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
     delete:
       tags:
         - Guest Sessions
@@ -129,8 +128,11 @@ paths:
       tags:
         - Guest Sessions
       summary: Create guest session
-      description: Creates a new guest session for a group reservation
+      description: Creates a new guest session for a group reservation. Guests may call anonymously. An owner may include a Cognito ID token in the Authorization bearer header; when validated as the reservation owner, the created session is marked as the owner session.
       operationId: createGuestSession
+      security:
+        - bearerAuth: []
+        - {}
       requestBody:
         required: true
         content:
@@ -152,6 +154,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Cognito signing metadata is temporarily unavailable while validating optional owner authentication
           content:
             application/json:
               schema:

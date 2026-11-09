@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using APIHandler.Constants;
+using APIHandler.Exceptions;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,15 @@ public static class CognitoIdTokenValidator
 
     public static async Task<ClaimsIdentity?> ValidateAsync(string token)
     {
-        var config = await ConfigManager.GetConfigurationAsync();
+        OpenIdConnectConfiguration config;
+        try
+        {
+            config = await ConfigManager.GetConfigurationAsync();
+        }
+        catch (Exception exception)
+        {
+            throw new CognitoMetadataUnavailableException(exception);
+        }
 
         var parameters = new TokenValidationParameters
         {
@@ -33,10 +42,10 @@ public static class CognitoIdTokenValidator
             ClockSkew = TimeSpan.FromMinutes(1)
         };
 
-        var handler = new JwtSecurityTokenHandler();
+        var handler = new JwtSecurityTokenHandler { MapInboundClaims = false };
         var result = await handler.ValidateTokenAsync(token, parameters);
 
-        if (!result.IsValid)
+        if (!result.IsValid || result.ClaimsIdentity?.FindFirst("token_use")?.Value != "id")
             return null;
 
         return result.ClaimsIdentity;

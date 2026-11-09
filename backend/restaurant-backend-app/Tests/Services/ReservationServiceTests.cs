@@ -765,7 +765,7 @@ public class ReservationServiceTests
 
         var result = await _reservationService.UpdateReservationAsync(reservation);
 
-        _mockGroupReservationService.Verify(r => r.CreateGroupReservationIfDoesNotExistAsync(userId, reservation.Id));
+        _mockGroupReservationService.Verify(r => r.CreateGroupReservationIfDoesNotExistAsync(reservation.Id));
     }
 
     [Theory]
@@ -778,7 +778,7 @@ public class ReservationServiceTests
 
         var result = await _reservationService.UpdateReservationAsync(reservation);
 
-        _mockGroupReservationService.Verify(r => r.CreateGroupReservationIfDoesNotExistAsync(userId, reservation.Id), Times.Never);
+        _mockGroupReservationService.Verify(r => r.CreateGroupReservationIfDoesNotExistAsync(reservation.Id), Times.Never);
     }
 
     [Theory]

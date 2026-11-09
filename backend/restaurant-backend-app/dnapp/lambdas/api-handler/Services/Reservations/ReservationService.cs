@@ -117,7 +117,7 @@ public class ReservationService : IReservationService
         if (reservation.Status == ReservationStatus.Reserved)
         {
             if (reservation.GuestCount >= 2)
-                await _groupReservationService.CreateGroupReservationIfDoesNotExistAsync(reservation.CustomerId, reservation.Id);
+                await _groupReservationService.CreateGroupReservationIfDoesNotExistAsync(reservation.Id);
 
             return true;
         }

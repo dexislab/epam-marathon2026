@@ -3,8 +3,6 @@ using Amazon.Lambda.Core;
 using APIHandler.Exceptions;
 using APIHandler.Helpers;
 using APIHandler.Services.GuestSessions;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace APIHandler.Handlers.GuestSessions;
@@ -20,19 +18,9 @@ public class GetOwnerSessionIdHandler(IGuestSessionService guestSessionService) 
         if (userId is null)
             return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
 
-        string? authorization = request.Headers?.FirstOrDefault(header =>
-            string.Equals(header.Key, "Authorization", StringComparison.OrdinalIgnoreCase)).Value;
-        const string bearerPrefix = "Bearer ";
-        if (authorization is null || !authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase))
-            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
-
-        string ownerAccessToken = authorization[bearerPrefix.Length..].Trim();
-        if (ownerAccessToken.Length == 0)
-            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
-
         try
         {
-            var response = await guestSessionService.GetOwnerSessionIdAsync(userId, reservationId, ownerAccessToken);
+            var response = await guestSessionService.GetOwnerSessionIdAsync(userId, reservationId);
             return ResponseBuilder.CreateJsonResponse(200, response);
         }
         catch (ReservationNotFoundException exception)
@@ -46,6 +34,10 @@ public class GetOwnerSessionIdHandler(IGuestSessionService guestSessionService) 
         catch (ActionForbiddenException exception)
         {
             return ResponseBuilder.CreateErrorResponse(403, exception.Message, context.Logger);
+        }
+        catch (GuestSessionNotFoundException exception)
+        {
+            return ResponseBuilder.CreateErrorResponse(404, exception.Message, context.Logger);
         }
         catch (ValidationException exception)
         {
