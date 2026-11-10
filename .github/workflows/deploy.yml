@@ -71,7 +71,6 @@ jobs:
           SDCT_CONF: .syndicate-config-restaurant-backend-app
           DOTNET_NOLOGO: true
           DOTNET_CLI_TELEMETRY_OPTOUT: true
-        run: syndicate build
         run: |
           unset XDG_RUNTIME_DIR
           syndicate build
