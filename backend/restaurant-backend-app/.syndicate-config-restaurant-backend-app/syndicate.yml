@@ -1,4 +1,5 @@
-account_id: "174137283686" #replace with your AWS account ID
+account_id: "174137283686" # replace with your AWS account ID
 region: "us-west-2"
-project_path: "/tmp/EPAM/marathon2026/backend/restaurant-backend-app" #replace with your project path
-deploy_target_bucket: "marathon2026-restaurant-artifacts-174137283686" #replace with your S3 bucket name
+project_path: "/home/runner/work/epam-marathon2026/epam-marathon2026/backend/restaurant-backend-app"
+#project_path: "/tmp/EPAM/marathon2026/backend/restaurant-backend-app" # replace with your project path (LOCAL OPS)
+deploy_target_bucket: "marathon2026-restaurant-artifacts-174137283686" # replace with your S3 bucket name
