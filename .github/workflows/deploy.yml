@@ -69,6 +69,9 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
         env:
           SDCT_CONF: .syndicate-config-restaurant-backend-app
+          DOTNET_NOLOGO: true
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
+          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
         run: syndicate build
 
       - name: Syndicate deploy
